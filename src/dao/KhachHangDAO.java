@@ -143,4 +143,28 @@ public class KhachHangDAO {
         }
         return list;
     }
+    // Tìm kiếm khách hàng theo địa chỉ
+public List<KhachHang> timKiemKhachHangTheoDiaChi(String keyword) {
+    List<KhachHang> list = new ArrayList<>();
+    String sql = "SELECT * FROM KhachHang WHERE DiaChi LIKE ?";
+    
+    try (Connection conn = dbConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setString(1, "%" + keyword + "%");
+        ResultSet rs = pstmt.executeQuery();
+        
+        while (rs.next()) {
+            KhachHang kh = new KhachHang();
+            kh.setMaKH(rs.getInt("MaKH"));
+            kh.setTenKH(rs.getString("TenKH"));
+            kh.setSdt(rs.getString("SDT"));
+            kh.setDiaChi(rs.getString("DiaChi"));
+            list.add(kh);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return list;
+}
 }
