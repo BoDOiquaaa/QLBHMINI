@@ -17,6 +17,7 @@ public class FormMain extends javax.swing.JFrame {
      */
     public FormMain() {
         initComponents();
+        FormChild.setLayout(new java.awt.BorderLayout());
     }
 
     /**
@@ -123,6 +124,11 @@ public class FormMain extends javax.swing.JFrame {
 
     private void btnQLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQLActionPerformed
         // TODO add your handling code here:
+    FormChild.removeAll();
+    FormQL formQL = new FormQL();
+    FormChild.add(formQL, java.awt.BorderLayout.CENTER);
+    FormChild.revalidate();
+    FormChild.repaint();
     }//GEN-LAST:event_btnQLActionPerformed
 
     /**
