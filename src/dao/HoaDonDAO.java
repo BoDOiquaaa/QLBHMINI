@@ -117,31 +117,34 @@ public class HoaDonDAO {
     }
     
     // Lấy hóa đơn theo mã
-    public HoaDon getHoaDonByMa(int maHD) {
-        String sql = "SELECT hd.*, kh.TenKH, kh.SDT, kh.DiaChi FROM HoaDon hd " +
-                     "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH WHERE hd.MaHD = ?";
+public HoaDon getHoaDonByMa(int maHD) {
+    String sql = "SELECT hd.*, kh.TenKH, kh.SDT, kh.DiaChi FROM HoaDon hd " +
+                 "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH WHERE hd.MaHD = ?";
+    
+    try (Connection conn = dbConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
         
-        try (Connection conn = dbConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, maHD);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                HoaDon hd = new HoaDon();
-                hd.setMaHD(rs.getInt("MaHD"));
-                hd.setMaKH(rs.getInt("MaKH"));
-                hd.setNgayLap(rs.getDate("NgayLap"));
-                hd.setGioLap(rs.getTime("GioLap"));
-                hd.setTongTien(rs.getDouble("TongTien"));
-                hd.setTenKH(rs.getString("TenKH"));
-                return hd;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        pstmt.setInt(1, maHD);
+        ResultSet rs = pstmt.executeQuery();
+        
+        if (rs.next()) {
+            HoaDon hd = new HoaDon();
+            hd.setMaHD(rs.getInt("MaHD"));
+            hd.setMaKH(rs.getInt("MaKH"));
+            hd.setNgayLap(rs.getDate("NgayLap"));
+            hd.setGioLap(rs.getTime("GioLap"));
+            hd.setTongTien(rs.getDouble("TongTien"));
+            hd.setTenKH(rs.getString("TenKH"));
+            // Thêm 2 dòng này nếu model HoaDon có setter cho SDT và DiaChi
+            // hd.setSdt(rs.getString("SDT"));
+            // hd.setDiaChi(rs.getString("DiaChi"));
+            return hd;
         }
-        return null;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return null;
+}
     
     // Báo cáo doanh thu theo ngày
     public List<Object[]> baoCaoDoanhThuTheoNgay(Date tuNgay, Date denNgay) {

@@ -131,6 +131,11 @@ public class FormHD extends javax.swing.JPanel {
         jLabel5.setText("Danh sách");
 
         btnChiTietHD.setText("Chi tiết");
+        btnChiTietHD.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnChiTietHDActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -289,6 +294,25 @@ public class FormHD extends javax.swing.JPanel {
         }
     }
     }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btnChiTietHDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChiTietHDActionPerformed
+    int row = tblBills.getSelectedRow();
+    if (row < 0) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn cần xem chi tiết!");
+        return;
+    }
+    
+    int maHD = (int) tableModel.getValueAt(row, 0);
+    
+    // Mở FormChiTietBill
+    FormChiTietBill dialog = new FormChiTietBill(
+        (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this), 
+        true, 
+        maHD
+    );
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+    }//GEN-LAST:event_btnChiTietHDActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

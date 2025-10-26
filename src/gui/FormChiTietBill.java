@@ -10,6 +10,8 @@ import model.ChiTietHD;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import java.text.SimpleDateFormat;
+import javax.swing.JLabel;
+import javax.swing.table.DefaultTableCellRenderer;
 /**
  *
  * @author khaid
@@ -25,11 +27,10 @@ public class FormChiTietBill extends javax.swing.JDialog {
      * Creates new form FormChiTietBill
      */
     public FormChiTietBill(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    super(parent, modal);
     this.maHD = maHD;
     initComponents();
     
-    // THÊM ĐOẠN NÀY ↓
     hoaDonDAO = new HoaDonDAO();
     
     // Disable các textfield
@@ -39,15 +40,16 @@ public class FormChiTietBill extends javax.swing.JDialog {
     txtDiaChi.setEditable(false);
     txtDate.setEditable(false);
     
+    // Thiết lập table
+    setupTable();
+    
+    // Load dữ liệu
+    loadChiTietHoaDon();
+    
     // Căn giữa dialog
     setLocationRelativeTo(parent);
-    btnClose.setText("Đóng");
-    btnClose.addActionListener(new java.awt.event.ActionListener() {
-    public void actionPerformed(java.awt.event.ActionEvent evt) {
-        btnCloseActionPerformed(evt);
     }
-});
-    }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -285,4 +287,84 @@ public class FormChiTietBill extends javax.swing.JDialog {
     private javax.swing.JTextField txtSDT;
     private javax.swing.JTextField txtTenKH;
     // End of variables declaration//GEN-END:variables
+private void setupTable() {
+    String[] columns = {"Tên sản phẩm", "Số lượng", "Đơn giá", "Thành tiền"};
+    tableModel = new DefaultTableModel(columns, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+    tblChiTietBill.setModel(tableModel);
+    
+    // Thiết lập độ rộng cột
+    tblChiTietBill.getColumnModel().getColumn(0).setPreferredWidth(150);
+    tblChiTietBill.getColumnModel().getColumn(1).setPreferredWidth(60);
+    tblChiTietBill.getColumnModel().getColumn(2).setPreferredWidth(80);
+    tblChiTietBill.getColumnModel().getColumn(3).setPreferredWidth(90);
+    
+    // Căn giữa cột số lượng
+    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+    centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+    tblChiTietBill.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+    
+    // Căn phải cột tiền
+    DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+    rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
+    tblChiTietBill.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
+    tblChiTietBill.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+}
+
+private void loadChiTietHoaDon() {
+    // Lấy thông tin hóa đơn
+    HoaDon hd = hoaDonDAO.getHoaDonByMa(maHD);
+    if (hd == null) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn!");
+        dispose();
+        return;
+    }
+    
+    // Hiển thị thông tin hóa đơn
+    txtMaHD.setText(String.valueOf(hd.getMaHD()));
+    txtTenKH.setText(hd.getTenKH() != null ? hd.getTenKH() : "Khách lẻ");
+    
+    // Hiển thị SĐT và địa chỉ (cần lấy từ HoaDonDAO)
+    txtSDT.setText(""); // Sẽ cập nhật sau
+    txtDiaChi.setText(""); // Sẽ cập nhật sau
+    
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    if (hd.getNgayLap() != null && hd.getGioLap() != null) {
+        java.util.Date fullDate = new java.util.Date(
+            hd.getNgayLap().getTime() + hd.getGioLap().getTime()
+        );
+        txtDate.setText(dateFormat.format(fullDate));
+    }
+    
+    // Lấy chi tiết hóa đơn
+    List<ChiTietHD> chiTietList = hoaDonDAO.getChiTietHoaDon(maHD);
+    
+    // Hiển thị chi tiết
+    tableModel.setRowCount(0);
+    double tongTien = 0;
+    
+    for (ChiTietHD ct : chiTietList) {
+        Object[] row = {
+            ct.getTenSP(),
+            ct.getSoLuong(),
+            String.format("%,.0f", ct.getDonGia()),
+            String.format("%,.0f", ct.getThanhTien())
+        };
+        tableModel.addRow(row);
+        tongTien += ct.getThanhTien();
+    }
+    
+    // Thêm dòng tổng cộng
+    Object[] totalRow = {
+        "TỔNG CỘNG",
+        "",
+        "",
+        String.format("%,.0f đ", tongTien)
+    };
+    tableModel.addRow(totalRow);
+}
 }
