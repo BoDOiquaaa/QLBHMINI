@@ -61,10 +61,10 @@ public class HoaDonDAO {
     
     // Lấy tất cả hóa đơn
     public List<HoaDon> getAllHoaDon() {
-        List<HoaDon> list = new ArrayList<>();
-        String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
-                     "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH " +
-                     "ORDER BY hd.MaHD DESC";
+    List<HoaDon> list = new ArrayList<>();
+    String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
+                 "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH " +
+                 "ORDER BY hd.NgayLap DESC, hd.GioLap DESC";
         
         try (Connection conn = dbConnection.getConnection();
              Statement stmt = conn.createStatement();
@@ -191,4 +191,124 @@ public class HoaDonDAO {
         }
         return list;
     }
+    public List<HoaDon> locHoaDonTheoNgay(Date tuNgay, Date denNgay) {
+    List<HoaDon> list = new ArrayList<>();
+    String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
+                 "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH " +
+                 "WHERE CAST(hd.NgayLap AS DATE) BETWEEN ? AND ? " +
+                 "ORDER BY hd.NgayLap DESC";
+    
+    try (Connection conn = dbConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setDate(1, tuNgay);
+        pstmt.setDate(2, denNgay);
+        ResultSet rs = pstmt.executeQuery();
+        
+        while (rs.next()) {
+            HoaDon hd = new HoaDon();
+            hd.setMaHD(rs.getInt("MaHD"));
+            hd.setMaKH(rs.getInt("MaKH"));
+            hd.setNgayLap(rs.getDate("NgayLap"));
+            hd.setGioLap(rs.getTime("GioLap"));
+            hd.setTongTien(rs.getDouble("TongTien"));
+            hd.setTenKH(rs.getString("TenKH"));
+            list.add(hd);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return list;
+}
+
+    // Tìm hóa đơn theo mã
+    public List<HoaDon> timHoaDonTheoMa(int maHD) {
+    List<HoaDon> list = new ArrayList<>();
+    String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
+                 "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH " +
+                 "WHERE hd.MaHD = ?";
+    
+    try (Connection conn = dbConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setInt(1, maHD);
+        ResultSet rs = pstmt.executeQuery();
+        
+        if (rs.next()) {
+            HoaDon hd = new HoaDon();
+            hd.setMaHD(rs.getInt("MaHD"));
+            hd.setMaKH(rs.getInt("MaKH"));
+            hd.setNgayLap(rs.getDate("NgayLap"));
+            hd.setGioLap(rs.getTime("GioLap"));
+            hd.setTongTien(rs.getDouble("TongTien"));
+            hd.setTenKH(rs.getString("TenKH"));
+            list.add(hd);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return list;
+}
+
+    // Lọc hóa đơn theo khách hàng
+    public List<HoaDon> locHoaDonTheoKhachHang(int maKH) {
+    List<HoaDon> list = new ArrayList<>();
+    String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
+                 "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH " +
+                 "WHERE hd.MaKH = ? ORDER BY hd.NgayLap DESC";
+    
+    try (Connection conn = dbConnection.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setInt(1, maKH);
+        ResultSet rs = pstmt.executeQuery();
+        
+        while (rs.next()) {
+            HoaDon hd = new HoaDon();
+            hd.setMaHD(rs.getInt("MaHD"));
+            hd.setMaKH(rs.getInt("MaKH"));
+            hd.setNgayLap(rs.getDate("NgayLap"));
+            hd.setGioLap(rs.getTime("GioLap"));
+            hd.setTongTien(rs.getDouble("TongTien"));
+            hd.setTenKH(rs.getString("TenKH"));
+            list.add(hd);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return list;
+}
+
+    // Xóa hóa đơn (xóa cả chi tiết)
+    public boolean xoaHoaDon(int maHD) {
+    String sqlChiTiet = "DELETE FROM ChiTietHD WHERE MaHD = ?";
+    String sqlHoaDon = "DELETE FROM HoaDon WHERE MaHD = ?";
+    
+    try (Connection conn = dbConnection.getConnection()) {
+        conn.setAutoCommit(false); // Bắt đầu transaction
+        
+        try (PreparedStatement pstmtChiTiet = conn.prepareStatement(sqlChiTiet);
+             PreparedStatement pstmtHoaDon = conn.prepareStatement(sqlHoaDon)) {
+            
+            // Xóa chi tiết trước
+            pstmtChiTiet.setInt(1, maHD);
+            pstmtChiTiet.executeUpdate();
+            
+            // Xóa hóa đơn
+            pstmtHoaDon.setInt(1, maHD);
+            int result = pstmtHoaDon.executeUpdate();
+            
+            conn.commit(); // Commit transaction
+            return result > 0;
+            
+        } catch (SQLException e) {
+            conn.rollback(); // Rollback nếu lỗi
+            e.printStackTrace();
+            return false;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 }

@@ -153,7 +153,7 @@ public class FormMain extends javax.swing.JFrame {
     private void btnHDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHDActionPerformed
     FormChild.removeAll();
     FormHD formHD = new FormHD();
-
+    
     FormChild.add(formHD, java.awt.BorderLayout.CENTER);
     FormChild.revalidate();
     FormChild.repaint();

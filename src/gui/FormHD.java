@@ -4,17 +4,43 @@
  */
 package gui;
 
+import dao.HoaDonDAO;
+import dao.KhachHangDAO;
+import model.HoaDon;
+import model.ChiTietHD;
+import model.KhachHang;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import javax.swing.JLabel;
+import javax.swing.table.DefaultTableCellRenderer;
+import java.util.ArrayList;
+
 /**
  *
  * @author khaid
  */
 public class FormHD extends javax.swing.JPanel {
-
+    private HoaDonDAO hoaDonDAO;
+    private KhachHangDAO khachHangDAO;
+    private DefaultTableModel tableModel;
+    private List<KhachHang> danhSachKH;
     /**
      * Creates new form FormHD
      */
     public FormHD() {
         initComponents();
+        
+    hoaDonDAO = new HoaDonDAO();
+    khachHangDAO = new KhachHangDAO();
+
+    setupTable();
+    setupComboBox();
+    loadData();
+    setupEvents();
+    setupTableRenderer();
     }
 
     /**
@@ -41,6 +67,7 @@ public class FormHD extends javax.swing.JPanel {
         cboList = new javax.swing.JComboBox<>();
         cboSearch = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
+        btnChiTietHD = new javax.swing.JButton();
 
         jButton1.setText("jButton1");
 
@@ -61,8 +88,18 @@ public class FormHD extends javax.swing.JPanel {
         jLabel1.setText("Danh sách hóa đơn");
 
         btnSearch.setText("Tìm");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         btnReset.setText("Làm mới");
+        btnReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetActionPerformed(evt);
+            }
+        });
 
         jLabel2.setText("Từ ngày:");
 
@@ -71,6 +108,11 @@ public class FormHD extends javax.swing.JPanel {
         jLabel4.setText("Lọc theo:");
 
         btnDelete.setText("Xóa hóa đơn");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         cboList.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cboList.addActionListener(new java.awt.event.ActionListener() {
@@ -87,6 +129,8 @@ public class FormHD extends javax.swing.JPanel {
         });
 
         jLabel5.setText("Danh sách");
+
+        btnChiTietHD.setText("Chi tiết");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -117,13 +161,14 @@ public class FormHD extends javax.swing.JPanel {
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(37, 37, 37)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(37, 37, 37)
                                 .addComponent(btnSearch)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGap(139, 139, 139)
+                                .addComponent(btnChiTietHD, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(btnDelete)))))
                 .addContainerGap())
             .addComponent(spBills)
@@ -137,11 +182,11 @@ public class FormHD extends javax.swing.JPanel {
                 .addGap(13, 13, 13)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jLabel2)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3)
                             .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jDateChooser2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING))
                     .addComponent(btnSearch))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -149,23 +194,105 @@ public class FormHD extends javax.swing.JPanel {
                     .addComponent(btnDelete)
                     .addComponent(cboList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5)
-                    .addComponent(cboSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
-                .addComponent(spBills, javax.swing.GroupLayout.PREFERRED_SIZE, 331, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cboSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnChiTietHD))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(spBills, javax.swing.GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void cboListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboListActionPerformed
-        // TODO add your handling code here:
+    if (cboList.getSelectedItem() == null) return;
+    
+    String loai = cboList.getSelectedItem().toString();
+    
+    if (loai.equals("Tất cả")) {
+        loadData();
+    } else if (loai.equals("Theo khách hàng")) {
+        cboSearch.removeAllItems();
+        danhSachKH = khachHangDAO.getAllKhachHang();
+        for (KhachHang kh : danhSachKH) {
+            cboSearch.addItem(kh.getTenKH());
+        }
+    }
     }//GEN-LAST:event_cboListActionPerformed
 
     private void cboSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboSearchActionPerformed
-        // TODO add your handling code here:
+    if (cboList.getSelectedItem() == null || cboSearch.getSelectedItem() == null) return;
+    
+    String loai = cboList.getSelectedItem().toString();
+    
+    if (loai.equals("Theo khách hàng")) {
+        int index = cboSearch.getSelectedIndex();
+        if (index >= 0 && danhSachKH != null && index < danhSachKH.size()) {
+            KhachHang kh = danhSachKH.get(index);
+            List<HoaDon> list = hoaDonDAO.locHoaDonTheoKhachHang(kh.getMaKH());
+            hienThiDanhSach(list);
+        }
+    }
     }//GEN-LAST:event_cboSearchActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+ Date tuNgay = jDateChooser1.getDate();
+    Date denNgay = jDateChooser2.getDate();
+    
+    if (tuNgay == null || denNgay == null) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày!");
+        return;
+    }
+    
+    if (tuNgay.after(denNgay)) {
+        JOptionPane.showMessageDialog(this, "Ngày bắt đầu phải trước ngày kết thúc!");
+        return;
+    }
+    
+    java.sql.Date sqlTuNgay = new java.sql.Date(tuNgay.getTime());
+    java.sql.Date sqlDenNgay = new java.sql.Date(denNgay.getTime());
+    
+    List<HoaDon> list = hoaDonDAO.locHoaDonTheoNgay(sqlTuNgay, sqlDenNgay);
+    hienThiDanhSach(list);
+    
+    if (list.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn nào!");
+    }
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+    jDateChooser1.setDate(null);
+    jDateChooser2.setDate(null);
+    cboList.setSelectedIndex(0);
+    cboSearch.setSelectedIndex(0);
+    loadData();
+    }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+    int row = tblBills.getSelectedRow();
+    if (row < 0) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn cần xóa!");
+        return;
+    }
+    
+    int maHD = (int) tableModel.getValueAt(row, 0);
+    
+    int confirm = JOptionPane.showConfirmDialog(this,
+        "Bạn có chắc muốn xóa hóa đơn #" + maHD + "?",
+        "Xác nhận xóa",
+        JOptionPane.YES_NO_OPTION);
+    
+    if (confirm == JOptionPane.YES_OPTION) {
+        if (hoaDonDAO.xoaHoaDon(maHD)) {
+            JOptionPane.showMessageDialog(this, "Xóa hóa đơn thành công!");
+            loadData();
+        } else {
+            JOptionPane.showMessageDialog(this, "Xóa hóa đơn thất bại!");
+        }
+    }
+    }//GEN-LAST:event_btnDeleteActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnChiTietHD;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnReset;
     private javax.swing.JButton btnSearch;
@@ -182,4 +309,106 @@ public class FormHD extends javax.swing.JPanel {
     private javax.swing.JScrollPane spBills;
     private javax.swing.JTable tblBills;
     // End of variables declaration//GEN-END:variables
+    private void setupTable() {
+        String[] columns = {"Mã HĐ", "Khách hàng", "Ngày lập", "Giờ", "Tổng tiền"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tblBills.setModel(tableModel);
+        
+        tblBills.getColumnModel().getColumn(0).setPreferredWidth(60);
+        tblBills.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tblBills.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tblBills.getColumnModel().getColumn(3).setPreferredWidth(80);
+        tblBills.getColumnModel().getColumn(4).setPreferredWidth(120);
+    }
+
+    private void setupComboBox() {
+        cboList.removeAllItems();
+        cboList.addItem("Tất cả");
+        cboList.addItem("Theo khách hàng");
+        
+        cboSearch.removeAllItems();
+        cboSearch.addItem("Chọn khách hàng");
+    }
+
+    private void loadData() {
+        tableModel.setRowCount(0);
+        List<HoaDon> list = hoaDonDAO.getAllHoaDon();
+        hienThiDanhSach(list);
+    }
+
+    private void hienThiDanhSach(List<HoaDon> list) {
+        tableModel.setRowCount(0);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        
+        for (HoaDon hd : list) {
+            Object[] row = {
+                hd.getMaHD(),
+                hd.getTenKH() != null ? hd.getTenKH() : "Khách lẻ",
+                hd.getNgayLap() != null ? dateFormat.format(hd.getNgayLap()) : "",
+                hd.getGioLap() != null ? timeFormat.format(hd.getGioLap()) : "",
+                String.format("%,.0f", hd.getTongTien())
+            };
+            tableModel.addRow(row);
+        }
+    }
+
+    private void setupEvents() {
+        tblBills.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    xemChiTietHoaDon();
+                }
+            }
+        });
+    }
+
+    private void xemChiTietHoaDon() {
+        int row = tblBills.getSelectedRow();
+        if (row < 0) return;
+        
+        int maHD = (int) tableModel.getValueAt(row, 0);
+        List<ChiTietHD> chiTiet = hoaDonDAO.getChiTietHoaDon(maHD);
+        
+        if (chiTiet.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Hóa đơn không có chi tiết!");
+            return;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("CHI TIẾT HÓA ĐƠN #").append(maHD).append("\n");
+        sb.append("=".repeat(50)).append("\n\n");
+        
+        double tong = 0;
+        for (ChiTietHD ct : chiTiet) {
+            sb.append(String.format("%-20s x%d\n", ct.getTenSP(), ct.getSoLuong()));
+            sb.append(String.format("  %,.0f x %d = %,.0f đ\n\n", 
+                ct.getDonGia(), ct.getSoLuong(), ct.getThanhTien()));
+            tong += ct.getThanhTien();
+        }
+        
+        sb.append("=".repeat(50)).append("\n");
+        sb.append(String.format("TỔNG CỘNG: %,.0f đ", tong));
+        
+        JOptionPane.showMessageDialog(this, sb.toString(), 
+            "Chi tiết hóa đơn", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void setupTableRenderer() {
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
+        tblBills.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        tblBills.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        tblBills.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        tblBills.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+    }
 }
+
