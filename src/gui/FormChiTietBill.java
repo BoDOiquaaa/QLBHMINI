@@ -4,6 +4,12 @@
  */
 package gui;
 
+import dao.HoaDonDAO;
+import model.HoaDon;
+import model.ChiTietHD;
+import java.util.List;
+import javax.swing.table.DefaultTableModel;
+import java.text.SimpleDateFormat;
 /**
  *
  * @author khaid
@@ -12,12 +18,35 @@ public class FormChiTietBill extends javax.swing.JDialog {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FormChiTietBill.class.getName());
 
+    private HoaDonDAO hoaDonDAO;
+    private DefaultTableModel tableModel;
+    private int maHD;
     /**
      * Creates new form FormChiTietBill
      */
     public FormChiTietBill(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        initComponents();
+    this.maHD = maHD;
+    initComponents();
+    
+    // THÊM ĐOẠN NÀY ↓
+    hoaDonDAO = new HoaDonDAO();
+    
+    // Disable các textfield
+    txtMaHD.setEditable(false);
+    txtTenKH.setEditable(false);
+    txtSDT.setEditable(false);
+    txtDiaChi.setEditable(false);
+    txtDate.setEditable(false);
+    
+    // Căn giữa dialog
+    setLocationRelativeTo(parent);
+    btnClose.setText("Đóng");
+    btnClose.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnCloseActionPerformed(evt);
+    }
+});
     }
 
     /**
@@ -117,6 +146,11 @@ public class FormChiTietBill extends javax.swing.JDialog {
 
         btnClose.setForeground(new java.awt.Color(255, 0, 0));
         btnClose.setText("Đóng");
+        btnClose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCloseActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -191,6 +225,10 @@ public class FormChiTietBill extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCloseActionPerformed
 
     /**
      * @param args the command line arguments
