@@ -4,17 +4,57 @@
  */
 package gui;
 
+import dao.HoaDonDAO;
+import dao.KhachHangDAO;
+import dao.SanPhamDAO;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import model.KhachHang;
+import model.SanPham;
 /**
  *
  * @author khaid
  */
 public class FormBH extends javax.swing.JPanel {
-
+// DAO để truy vấn database
+    private KhachHangDAO khachHangDAO;
+    private SanPhamDAO sanPhamDAO;
+    private HoaDonDAO hoaDonDAO;
+    
+    // Danh sách dữ liệu
+    private List<KhachHang> danhSachKH;
+    private List<SanPham> danhSachSP;
+    
+    // Table model cho giỏ hàng
+    private DefaultTableModel modelGioHang;
+    
+    // Khách hàng đã chọn
+    private KhachHang khachHangDaChon = null;
     /**
      * Creates new form FormBH
      */
     public FormBH() {
         initComponents();
+        // Khởi tạo DAO
+    khachHangDAO = new KhachHangDAO();
+    sanPhamDAO = new SanPhamDAO();
+    hoaDonDAO = new HoaDonDAO();
+    
+    // Thiết lập giao diện
+    setupTable();
+    spnSoLuong.setValue(1);
+    loadDataComboBox();
+    setupEvents();
+    
+    // Vô hiệu hóa một số fields
+    txtSDT.setEditable(false);
+    txtDiaChi.setEditable(false);
+    txtDonGia.setEditable(false);
+    txtTonKho.setEditable(false);
     }
 
     /**
@@ -55,6 +95,8 @@ public class FormBH extends javax.swing.JPanel {
         tblSanPham = new javax.swing.JTable();
         btnInBill = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
+        txtTong = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
 
         pnlKH.setBackground(new java.awt.Color(204, 255, 255));
 
@@ -78,6 +120,11 @@ public class FormBH extends javax.swing.JPanel {
         jLabel3.setText("Khách hàng:");
 
         btnChoice.setText("Chọn");
+        btnChoice.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnChoiceActionPerformed(evt);
+            }
+        });
 
         jLabel4.setText("SDT:");
 
@@ -141,7 +188,7 @@ public class FormBH extends javax.swing.JPanel {
                     .addComponent(txtSDT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtDiaChi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
@@ -160,6 +207,11 @@ public class FormBH extends javax.swing.JPanel {
         btnAdd.setBackground(new java.awt.Color(102, 255, 153));
         btnAdd.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         btnAdd.setText("Thêm vào giỏ");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
 
         jLabel11.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel11.setText("Giỏ hàng");
@@ -181,9 +233,21 @@ public class FormBH extends javax.swing.JPanel {
 
         btnInBill.setBackground(new java.awt.Color(153, 204, 255));
         btnInBill.setText("Xuất hóa đơn");
+        btnInBill.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInBillActionPerformed(evt);
+            }
+        });
 
         btnDelete.setBackground(new java.awt.Color(255, 153, 153));
         btnDelete.setText("Xóa khỏi giỏ hàng");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
+
+        jLabel12.setText("Tổng tiền");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -192,9 +256,13 @@ public class FormBH extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel11)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
                 .addComponent(btnDelete)
-                .addGap(59, 59, 59)
+                .addGap(23, 23, 23)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtTong, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnInBill, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .addComponent(spSanPham)
@@ -207,9 +275,11 @@ public class FormBH extends javax.swing.JPanel {
                     .addComponent(jLabel11)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnDelete)
-                        .addComponent(btnInBill)))
+                        .addComponent(btnInBill)
+                        .addComponent(txtTong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel12)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spSanPham, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE))
+                .addComponent(spSanPham, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -240,7 +310,7 @@ public class FormBH extends javax.swing.JPanel {
                         .addComponent(txtTonKho)))
                 .addGap(29, 29, 29)
                 .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(126, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(pnlKH, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -263,19 +333,297 @@ public class FormBH extends javax.swing.JPanel {
                             .addComponent(jLabel8)
                             .addComponent(txtDonGia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel10)
-                            .addComponent(txtTonKho, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(7, 7, 7))
+                            .addComponent(txtTonKho, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 5, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        // TODO add your handling code here:
+ String keyword = txtSearch.getText().trim();
+    if (keyword.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Vui lòng nhập từ khóa tìm kiếm!");
+        return;
+    }
+    
+    int loaiTimKiem = cboSearch.getSelectedIndex();
+    List<KhachHang> ketQua = new ArrayList<>();
+    
+    switch (loaiTimKiem) {
+        case 0: // Tìm theo Tên
+        case 1: // Tìm theo SĐT
+            ketQua = khachHangDAO.timKiemKhachHang(keyword);
+            break;
+        case 2: // Tìm theo Địa chỉ
+            ketQua = khachHangDAO.timKiemKhachHangTheoDiaChi(keyword);
+            break;
+    }
+    
+    // Cập nhật ComboBox
+    cboKH.removeAllItems();
+    if (ketQua.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Không tìm thấy khách hàng!");
+        loadDataComboBox();
+    } else {
+        danhSachKH = ketQua;
+        for (KhachHang kh : ketQua) {
+            cboKH.addItem(kh.getTenKH()); 
+        }
+        JOptionPane.showMessageDialog(this, "Tìm thấy " + ketQua.size() + " khách hàng!");
+    }
     }//GEN-LAST:event_btnSearchActionPerformed
 
+    private void btnChoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChoiceActionPerformed
+int index = cboKH.getSelectedIndex();
+    if (index >= 0 && index < danhSachKH.size()) {
+        khachHangDaChon = danhSachKH.get(index);
+        
+        txtSDT.setText(khachHangDaChon.getSdt() != null ? khachHangDaChon.getSdt() : "");
+        txtDiaChi.setText(khachHangDaChon.getDiaChi() != null ? khachHangDaChon.getDiaChi() : "");
+        
+    } else {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng!");
+    }
+    }//GEN-LAST:event_btnChoiceActionPerformed
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+    if (khachHangDaChon == null) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng trước!");
+        return;
+    }
+    
+    // Lấy sản phẩm
+    int indexSP = cboSP.getSelectedIndex();
+    if (indexSP < 0 || indexSP >= danhSachSP.size()) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm!");
+        return;
+    }
+    
+    SanPham sp = danhSachSP.get(indexSP);
+    
+    // Lấy số lượng
+    int soLuong = (Integer) spnSoLuong.getValue();
+    if (soLuong <= 0) {
+        JOptionPane.showMessageDialog(this, "Số lượng phải lớn hơn 0!");
+        return;
+    }
+    
+    // Kiểm tra tồn kho
+    if (soLuong > sp.getTonKho()) {
+        JOptionPane.showMessageDialog(this, 
+            "Không đủ hàng! Còn: " + sp.getTonKho());
+        return;
+    }
+    
+    // Kiểm tra sản phẩm đã có chưa
+    boolean daTonTai = false;
+    for (int i = 0; i < modelGioHang.getRowCount(); i++) {
+        int maSP = (int) modelGioHang.getValueAt(i, 0);
+        if (maSP == sp.getMaSP()) {
+            int slCu = (int) modelGioHang.getValueAt(i, 3);
+            int slMoi = slCu + soLuong;
+            
+            if (slMoi > sp.getTonKho()) {
+                JOptionPane.showMessageDialog(this, "Không đủ hàng!");
+                return;
+            }
+            
+            modelGioHang.setValueAt(slMoi, i, 3);
+            capNhatThanhTien(i);
+            daTonTai = true;
+            break;
+        }
+    }
+    
+    // Thêm mới nếu chưa có
+    if (!daTonTai) {
+        double thanhTien = sp.getDonGia() * soLuong;
+        Object[] row = {
+            sp.getMaSP(),
+            sp.getTenSP(),
+            sp.getDonGia(),
+            soLuong,
+            thanhTien
+        };
+        modelGioHang.addRow(row);
+    }
+    
+    tinhTongTien();
+    spnSoLuong.setValue(1);
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+    int row = tblSanPham.getSelectedRow();
+    if (row >= 0) {
+        int choice = JOptionPane.showConfirmDialog(this,
+            "Xóa sản phẩm này?",
+            "Xác nhận",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (choice == JOptionPane.YES_OPTION) {
+            modelGioHang.removeRow(row);
+            tinhTongTien();
+        }
+    } else {
+        JOptionPane.showMessageDialog(this, "Chọn sản phẩm cần xóa!");
+    }
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btnInBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInBillActionPerformed
+if (khachHangDaChon == null) {
+        JOptionPane.showMessageDialog(this, "Chưa chọn khách hàng!");
+        return;
+    }
+    
+    if (modelGioHang.getRowCount() == 0) {
+        JOptionPane.showMessageDialog(this, "Giỏ hàng trống!");
+        return;
+    }
+    
+    // Xác nhận
+    int choice = JOptionPane.showConfirmDialog(this,
+        "Xác nhận xuất hóa đơn?",
+        "Xác nhận",
+        JOptionPane.YES_NO_OPTION);
+    
+    if (choice != JOptionPane.YES_OPTION) return;
+    
+    // Tạo hóa đơn
+    int maHD = hoaDonDAO.taoHoaDon(khachHangDaChon.getMaKH());
+    
+    if (maHD > 0) {
+        boolean success = true;
+        
+        // Thêm chi tiết
+        for (int i = 0; i < modelGioHang.getRowCount(); i++) {
+            int maSP = (int) modelGioHang.getValueAt(i, 0);
+            int soLuong = (int) modelGioHang.getValueAt(i, 3);
+            
+            if (!hoaDonDAO.themChiTietHD(maHD, maSP, soLuong)) {
+                success = false;
+                break;
+            }
+        }
+        
+        if (success) {
+            JOptionPane.showMessageDialog(this,
+                "Xuất hóa đơn thành công!\nMã HĐ: " + maHD,
+                "Thành công",
+                JOptionPane.INFORMATION_MESSAGE);
+            resetForm();
+        } else {
+            JOptionPane.showMessageDialog(this, "Có lỗi xảy ra!");
+        }
+    } else {
+        JOptionPane.showMessageDialog(this, "Không thể tạo hóa đơn!");
+    }
+    }//GEN-LAST:event_btnInBillActionPerformed
+
+private void setupTable() {
+    // Tạo model cho table
+    String[] columns = {"Mã SP", "Tên SP", "Đơn giá", "Số lượng", "Thành tiền"};
+    modelGioHang = new DefaultTableModel(columns, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            // Chỉ cho phép sửa cột Số lượng (column 3)
+            return column == 3;
+        }
+        
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            if (columnIndex == 0 || columnIndex == 3) return Integer.class;
+            if (columnIndex == 2 || columnIndex == 4) return Double.class;
+            return String.class;
+        }
+    };
+    
+    tblSanPham.setModel(modelGioHang);
+    
+    // Thiết lập độ rộng cột
+    tblSanPham.getColumnModel().getColumn(0).setPreferredWidth(50);  // Mã SP
+    tblSanPham.getColumnModel().getColumn(1).setPreferredWidth(150); // Tên SP
+    tblSanPham.getColumnModel().getColumn(2).setPreferredWidth(80);  // Đơn giá
+    tblSanPham.getColumnModel().getColumn(3).setPreferredWidth(80);  // Số lượng
+    tblSanPham.getColumnModel().getColumn(4).setPreferredWidth(100); // Thành tiền
+    
+    // Format hiển thị tiền
+    DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+    rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
+    tblSanPham.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
+    tblSanPham.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
+}
+private void loadDataComboBox() {
+    // Load Khách hàng
+    danhSachKH = khachHangDAO.getAllKhachHang();
+    cboKH.removeAllItems();
+    for (KhachHang kh : danhSachKH) {
+        cboKH.addItem(kh.getTenKH()); 
+    }
+    
+    // Load Sản phẩm
+    danhSachSP = sanPhamDAO.getAllSanPham();
+    cboSP.removeAllItems();
+    for (SanPham sp : danhSachSP) {
+        cboSP.addItem(sp.getTenSP());
+    }
+}
+private void setupEvents() {
+    // Khi chọn sản phẩm trong ComboBox
+    cboSP.addActionListener(e -> {
+        int index = cboSP.getSelectedIndex();
+        if (index >= 0 && index < danhSachSP.size()) {
+            SanPham sp = danhSachSP.get(index);
+            txtDonGia.setText(String.valueOf(sp.getDonGia()));
+            txtTonKho.setText(String.valueOf(sp.getTonKho()));
+        }
+    });
+    
+    // Khi thay đổi số lượng trong table
+    tblSanPham.getModel().addTableModelListener(e -> {
+        if (e.getColumn() == 3) { // Cột Số lượng
+            int row = e.getFirstRow();
+            capNhatThanhTien(row);
+            tinhTongTien();
+        }
+    });
+}
+
+private void capNhatThanhTien(int row) {
+    try {
+        double donGia = (double) modelGioHang.getValueAt(row, 2);
+        int soLuong = (int) modelGioHang.getValueAt(row, 3);
+        double thanhTien = donGia * soLuong;
+        modelGioHang.setValueAt(thanhTien, row, 4);
+    } catch (Exception e) {
+        System.err.println("Lỗi cập nhật thành tiền: " + e.getMessage());
+    }
+}
+
+
+private void tinhTongTien() {
+    double tong = 0;
+    for (int i = 0; i < modelGioHang.getRowCount(); i++) {
+        Object value = modelGioHang.getValueAt(i, 4);
+        if (value != null) {
+            tong += (double) value;
+        }
+    }
+    txtTong.setText(String.format("%,.0f", tong));
+}
+
+
+private void resetForm() {
+    modelGioHang.setRowCount(0);
+    txtSDT.setText("");
+    txtDiaChi.setText("");
+    txtTong.setText("0");
+    khachHangDaChon = null;
+    spnSoLuong.setValue(1);
+    loadDataComboBox();
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
@@ -289,6 +637,7 @@ public class FormBH extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -307,5 +656,6 @@ public class FormBH extends javax.swing.JPanel {
     private javax.swing.JTextField txtSDT;
     private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtTonKho;
+    private javax.swing.JTextField txtTong;
     // End of variables declaration//GEN-END:variables
 }
