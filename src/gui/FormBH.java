@@ -49,7 +49,8 @@ public class FormBH extends javax.swing.JPanel {
     spnSoLuong.setValue(1);
     loadDataComboBox();
     setupEvents();
-    
+    spnEdit = new javax.swing.JSpinner();
+    spnEdit.setModel(new javax.swing.SpinnerNumberModel(1, 1, 1000, 1));
     // Vô hiệu hóa một số fields
     txtSDT.setEditable(false);
     txtDiaChi.setEditable(false);
@@ -97,6 +98,7 @@ public class FormBH extends javax.swing.JPanel {
         btnDelete = new javax.swing.JButton();
         txtTong = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
+        spnEdit = new javax.swing.JSpinner();
 
         pnlKH.setBackground(new java.awt.Color(204, 255, 255));
 
@@ -256,9 +258,11 @@ public class FormBH extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel11)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(spnEdit, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnDelete)
-                .addGap(23, 23, 23)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel12)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtTong, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -272,14 +276,16 @@ public class FormBH extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel11)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel11)
+                        .addComponent(spnEdit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnDelete)
                         .addComponent(btnInBill)
                         .addComponent(txtTong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel12)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spSanPham, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE))
+                .addComponent(spSanPham, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -579,6 +585,7 @@ private void setupEvents() {
             txtDonGia.setText(String.valueOf(sp.getDonGia()));
             txtTonKho.setText(String.valueOf(sp.getTonKho()));
         }
+        
     });
     
     // Khi thay đổi số lượng trong table
@@ -589,6 +596,45 @@ private void setupEvents() {
             tinhTongTien();
         }
     });
+tblSanPham.getSelectionModel().addListSelectionListener(e -> {
+    // Kiểm tra để không gọi nhiều lần khi người dùng di chuyển
+    if (!e.getValueIsAdjusting()) {
+        int row = tblSanPham.getSelectedRow();
+        if (row >= 0) {
+            int soLuong = (int) modelGioHang.getValueAt(row, 3);
+            spnEdit.setValue(soLuong);
+            spnEdit.setEnabled(true); // bật chỉnh sửa khi có dòng được chọn
+        } else {
+            spnEdit.setEnabled(false); // tắt nếu không chọn gì
+        }
+    }
+});
+spnEdit.addChangeListener(e -> {
+    if (!spnEdit.isEnabled()) return; // không làm gì nếu spinner bị tắt
+
+    int row = tblSanPham.getSelectedRow();
+    if (row >= 0) {
+        int soLuongMoi = (int) spnEdit.getValue();
+        int maSP = (int) modelGioHang.getValueAt(row, 0);
+
+        SanPham sp = danhSachSP.stream()
+            .filter(x -> x.getMaSP() == maSP)
+            .findFirst()
+            .orElse(null);
+
+        if (sp != null && soLuongMoi > sp.getTonKho()) {
+            JOptionPane.showMessageDialog(this,
+                "Không đủ hàng! Còn: " + sp.getTonKho());
+            spnEdit.setValue(sp.getTonKho());
+            return;
+        }
+
+        modelGioHang.setValueAt(soLuongMoi, row, 3);
+        capNhatThanhTien(row);
+        tinhTongTien();
+    }
+});
+    
 }
 
 private void capNhatThanhTien(int row) {
@@ -649,6 +695,7 @@ private void resetForm() {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel pnlKH;
     private javax.swing.JScrollPane spSanPham;
+    private javax.swing.JSpinner spnEdit;
     private javax.swing.JSpinner spnSoLuong;
     private javax.swing.JTable tblSanPham;
     private javax.swing.JTextField txtDiaChi;
