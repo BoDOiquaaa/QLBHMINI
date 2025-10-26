@@ -60,6 +60,11 @@ public class FormMain extends javax.swing.JFrame {
         });
 
         btnHD.setText("Hóa đơn");
+        btnHD.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHDActionPerformed(evt);
+            }
+        });
 
         btnReport.setText("Báo Cáo");
 
@@ -144,6 +149,15 @@ public class FormMain extends javax.swing.JFrame {
     FormChild.revalidate();
     FormChild.repaint();
     }//GEN-LAST:event_btnBHActionPerformed
+
+    private void btnHDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHDActionPerformed
+    FormChild.removeAll();
+    FormHD formHD = new FormHD();
+
+    FormChild.add(formHD, java.awt.BorderLayout.CENTER);
+    FormChild.revalidate();
+    FormChild.repaint();
+    }//GEN-LAST:event_btnHDActionPerformed
 
     /**
      * @param args the command line arguments

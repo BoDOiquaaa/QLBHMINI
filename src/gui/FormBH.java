@@ -46,6 +46,7 @@ public class FormBH extends javax.swing.JPanel {
     
     // Thiết lập giao diện
     setupTable();
+    setupTableRenderer(); 
     spnSoLuong.setValue(1);
     loadDataComboBox();
     setupEvents();
@@ -396,7 +397,7 @@ int index = cboKH.getSelectedIndex();
     }//GEN-LAST:event_btnChoiceActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-    if (khachHangDaChon == null) {
+if (khachHangDaChon == null) {
         JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng trước!");
         return;
     }
@@ -433,13 +434,17 @@ int index = cboKH.getSelectedIndex();
             int slMoi = slCu + soLuong;
             
             if (slMoi > sp.getTonKho()) {
-                JOptionPane.showMessageDialog(this, "Không đủ hàng!");
+                JOptionPane.showMessageDialog(this, 
+                    "Không đủ hàng! Tổng sẽ là " + slMoi + ", còn: " + sp.getTonKho());
                 return;
             }
             
             modelGioHang.setValueAt(slMoi, i, 3);
             capNhatThanhTien(i);
             daTonTai = true;
+            
+            // Chọn dòng vừa cập nhật
+            tblSanPham.setRowSelectionInterval(i, i);
             break;
         }
     }
@@ -455,10 +460,17 @@ int index = cboKH.getSelectedIndex();
             thanhTien
         };
         modelGioHang.addRow(row);
+        
+        // Chọn dòng mới thêm
+        int newRow = modelGioHang.getRowCount() - 1;
+        tblSanPham.setRowSelectionInterval(newRow, newRow);
     }
     
     tinhTongTien();
+    
+    // Reset spinner về 1
     spnSoLuong.setValue(1);
+
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
@@ -529,20 +541,27 @@ if (khachHangDaChon == null) {
     }//GEN-LAST:event_btnInBillActionPerformed
 
 private void setupTable() {
-    // Tạo model cho table
+        // Tạo model cho table
     String[] columns = {"Mã SP", "Tên SP", "Đơn giá", "Số lượng", "Thành tiền"};
     modelGioHang = new DefaultTableModel(columns, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
-            // Chỉ cho phép sửa cột Số lượng (column 3)
-            return column == 3;
+            // Không cho phép edit trực tiếp, dùng spnEdit
+            return false;
         }
         
         @Override
         public Class<?> getColumnClass(int columnIndex) {
-            if (columnIndex == 0 || columnIndex == 3) return Integer.class;
-            if (columnIndex == 2 || columnIndex == 4) return Double.class;
-            return String.class;
+            switch (columnIndex) {
+                case 0: // Mã SP
+                case 3: // Số lượng
+                    return Integer.class;
+                case 2: // Đơn giá
+                case 4: // Thành tiền
+                    return Double.class;
+                default:
+                    return String.class;
+            }
         }
     };
     
@@ -550,16 +569,18 @@ private void setupTable() {
     
     // Thiết lập độ rộng cột
     tblSanPham.getColumnModel().getColumn(0).setPreferredWidth(50);  // Mã SP
-    tblSanPham.getColumnModel().getColumn(1).setPreferredWidth(150); // Tên SP
-    tblSanPham.getColumnModel().getColumn(2).setPreferredWidth(80);  // Đơn giá
+    tblSanPham.getColumnModel().getColumn(1).setPreferredWidth(200); // Tên SP
+    tblSanPham.getColumnModel().getColumn(2).setPreferredWidth(100); // Đơn giá
     tblSanPham.getColumnModel().getColumn(3).setPreferredWidth(80);  // Số lượng
-    tblSanPham.getColumnModel().getColumn(4).setPreferredWidth(100); // Thành tiền
+    tblSanPham.getColumnModel().getColumn(4).setPreferredWidth(120); // Thành tiền
     
-    // Format hiển thị tiền
-    DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
-    rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
-    tblSanPham.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
-    tblSanPham.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
+    // Set chiều cao row
+    tblSanPham.setRowHeight(25);
+    
+    // Căn giữa cột Số lượng
+    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+    centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+    tblSanPham.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
 }
 private void loadDataComboBox() {
     // Load Khách hàng
@@ -582,69 +603,86 @@ private void setupEvents() {
         int index = cboSP.getSelectedIndex();
         if (index >= 0 && index < danhSachSP.size()) {
             SanPham sp = danhSachSP.get(index);
-            txtDonGia.setText(String.valueOf(sp.getDonGia()));
+            txtDonGia.setText(String.format("%,.0f", sp.getDonGia()));
             txtTonKho.setText(String.valueOf(sp.getTonKho()));
+            
+            // Cập nhật giới hạn spinner
+            javax.swing.SpinnerNumberModel model = new javax.swing.SpinnerNumberModel(
+                1,              // Giá trị ban đầu
+                1,              // Giá trị min
+                sp.getTonKho(), // Giá trị max
+                1               // Bước nhảy
+            );
+            spnSoLuong.setModel(model);
         }
-        
     });
     
-    // Khi thay đổi số lượng trong table
-    tblSanPham.getModel().addTableModelListener(e -> {
-        if (e.getColumn() == 3) { // Cột Số lượng
-            int row = e.getFirstRow();
-            capNhatThanhTien(row);
-            tinhTongTien();
+    // Disable spnEdit ban đầu
+    spnEdit.setEnabled(false);
+    
+    // Khi chọn dòng trong table
+    tblSanPham.getSelectionModel().addListSelectionListener(e -> {
+        if (!e.getValueIsAdjusting()) {
+            int row = tblSanPham.getSelectedRow();
+            if (row >= 0) {
+                int soLuong = (int) modelGioHang.getValueAt(row, 3);
+                int maSP = (int) modelGioHang.getValueAt(row, 0);
+                
+                // Tìm sản phẩm để lấy tồn kho
+                SanPham sp = danhSachSP.stream()
+                    .filter(x -> x.getMaSP() == maSP)
+                    .findFirst()
+                    .orElse(null);
+                
+                if (sp != null) {
+                    // Cập nhật spinner với giới hạn tồn kho
+                    javax.swing.SpinnerNumberModel model = new javax.swing.SpinnerNumberModel(
+                        soLuong,        // Giá trị hiện tại
+                        1,              // Min
+                        sp.getTonKho(), // Max
+                        1               // Step
+                    );
+                    spnEdit.setModel(model);
+                    spnEdit.setEnabled(true);
+                } else {
+                    spnEdit.setEnabled(false);
+                }
+            } else {
+                spnEdit.setEnabled(false);
+            }
         }
     });
-tblSanPham.getSelectionModel().addListSelectionListener(e -> {
-    // Kiểm tra để không gọi nhiều lần khi người dùng di chuyển
-    if (!e.getValueIsAdjusting()) {
+    
+    // Khi thay đổi giá trị spnEdit
+    spnEdit.addChangeListener(e -> {
+        if (!spnEdit.isEnabled()) return;
+        
         int row = tblSanPham.getSelectedRow();
         if (row >= 0) {
-            int soLuong = (int) modelGioHang.getValueAt(row, 3);
-            spnEdit.setValue(soLuong);
-            spnEdit.setEnabled(true); // bật chỉnh sửa khi có dòng được chọn
-        } else {
-            spnEdit.setEnabled(false); // tắt nếu không chọn gì
+            int soLuongMoi = (int) spnEdit.getValue();
+            int soLuongCu = (int) modelGioHang.getValueAt(row, 3);
+            
+            // Chỉ cập nhật nếu giá trị thực sự thay đổi
+            if (soLuongMoi != soLuongCu) {
+                modelGioHang.setValueAt(soLuongMoi, row, 3);
+                capNhatThanhTien(row);
+                tinhTongTien();
+            }
         }
-    }
-});
-spnEdit.addChangeListener(e -> {
-    if (!spnEdit.isEnabled()) return; // không làm gì nếu spinner bị tắt
-
-    int row = tblSanPham.getSelectedRow();
-    if (row >= 0) {
-        int soLuongMoi = (int) spnEdit.getValue();
-        int maSP = (int) modelGioHang.getValueAt(row, 0);
-
-        SanPham sp = danhSachSP.stream()
-            .filter(x -> x.getMaSP() == maSP)
-            .findFirst()
-            .orElse(null);
-
-        if (sp != null && soLuongMoi > sp.getTonKho()) {
-            JOptionPane.showMessageDialog(this,
-                "Không đủ hàng! Còn: " + sp.getTonKho());
-            spnEdit.setValue(sp.getTonKho());
-            return;
-        }
-
-        modelGioHang.setValueAt(soLuongMoi, row, 3);
-        capNhatThanhTien(row);
-        tinhTongTien();
-    }
-});
-    
+    });
 }
 
 private void capNhatThanhTien(int row) {
     try {
-        double donGia = (double) modelGioHang.getValueAt(row, 2);
-        int soLuong = (int) modelGioHang.getValueAt(row, 3);
-        double thanhTien = donGia * soLuong;
-        modelGioHang.setValueAt(thanhTien, row, 4);
+        if (row >= 0 && row < modelGioHang.getRowCount()) {
+            double donGia = (double) modelGioHang.getValueAt(row, 2);
+            int soLuong = (int) modelGioHang.getValueAt(row, 3);
+            double thanhTien = donGia * soLuong;
+            modelGioHang.setValueAt(thanhTien, row, 4);
+        }
     } catch (Exception e) {
         System.err.println("Lỗi cập nhật thành tiền: " + e.getMessage());
+        e.printStackTrace();
     }
 }
 
@@ -669,6 +707,23 @@ private void resetForm() {
     khachHangDaChon = null;
     spnSoLuong.setValue(1);
     loadDataComboBox();
+}
+private void setupTableRenderer() {
+    DefaultTableCellRenderer moneyRenderer = new DefaultTableCellRenderer() {
+        @Override
+        public void setValue(Object value) {
+            if (value instanceof Double) {
+                setText(String.format("%,.0f", (Double) value));
+            } else {
+                super.setValue(value);
+            }
+            setHorizontalAlignment(JLabel.RIGHT);
+        }
+    };
+    
+    // Áp dụng cho cột Đơn giá và Thành tiền
+    tblSanPham.getColumnModel().getColumn(2).setCellRenderer(moneyRenderer);
+    tblSanPham.getColumnModel().getColumn(4).setCellRenderer(moneyRenderer);
 }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
