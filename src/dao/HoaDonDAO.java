@@ -136,8 +136,8 @@ public HoaDon getHoaDonByMa(int maHD) {
             hd.setTongTien(rs.getDouble("TongTien"));
             hd.setTenKH(rs.getString("TenKH"));
             // Thêm 2 dòng này nếu model HoaDon có setter cho SDT và DiaChi
-            // hd.setSdt(rs.getString("SDT"));
-            // hd.setDiaChi(rs.getString("DiaChi"));
+            hd.setSdt(rs.getString("SDT"));
+            hd.setDiaChi(rs.getString("DiaChi"));
             return hd;
         }
     } catch (SQLException e) {

@@ -26,7 +26,7 @@ public class FormChiTietBill extends javax.swing.JDialog {
     /**
      * Creates new form FormChiTietBill
      */
-    public FormChiTietBill(java.awt.Frame parent, boolean modal) {
+    public FormChiTietBill(java.awt.Frame parent, boolean modal, int maHD) {
     super(parent, modal);
     this.maHD = maHD;
     initComponents();
@@ -40,6 +40,11 @@ public class FormChiTietBill extends javax.swing.JDialog {
     txtDiaChi.setEditable(false);
     txtDate.setEditable(false);
     
+    txtMaHD.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+    txtTenKH.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+    txtSDT.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+    txtDiaChi.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+    txtDate.setBorder(javax.swing.BorderFactory.createEmptyBorder());
     // Thiết lập table
     setupTable();
     
@@ -257,7 +262,7 @@ public class FormChiTietBill extends javax.swing.JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                FormChiTietBill dialog = new FormChiTietBill(new javax.swing.JFrame(), true);
+                FormChiTietBill dialog = new FormChiTietBill(new javax.swing.JFrame(), true, 1);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -329,8 +334,8 @@ private void loadChiTietHoaDon() {
     txtTenKH.setText(hd.getTenKH() != null ? hd.getTenKH() : "Khách lẻ");
     
     // Hiển thị SĐT và địa chỉ (cần lấy từ HoaDonDAO)
-    txtSDT.setText(""); // Sẽ cập nhật sau
-    txtDiaChi.setText(""); // Sẽ cập nhật sau
+    txtSDT.setText(hd.getSdt() != null ? hd.getSdt() : "");
+    txtDiaChi.setText(hd.getDiaChi() != null ? hd.getDiaChi() : "");
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     if (hd.getNgayLap() != null && hd.getGioLap() != null) {

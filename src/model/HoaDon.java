@@ -1,15 +1,8 @@
 package model;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 import java.sql.Date;
 import java.sql.Time;
-/**
- *
- * @author khaid
- */
+
 public class HoaDon {
     private int maHD;
     private int maKH;
@@ -19,6 +12,8 @@ public class HoaDon {
     
     // Thông tin khách hàng (để hiển thị)
     private String tenKH;
+    private String sdt;      // ← ĐÃ THÊM
+    private String diaChi;   // ← ĐÃ THÊM
 
     // Constructor không tham số
     public HoaDon() {
@@ -86,6 +81,23 @@ public class HoaDon {
 
     public void setTenKH(String tenKH) {
         this.tenKH = tenKH;
+    }
+
+    // ← THÊM 4 METHOD NÀY
+    public String getSdt() {
+        return sdt;
+    }
+
+    public void setSdt(String sdt) {
+        this.sdt = sdt;
+    }
+
+    public String getDiaChi() {
+        return diaChi;
+    }
+
+    public void setDiaChi(String diaChi) {
+        this.diaChi = diaChi;
     }
 
     @Override
