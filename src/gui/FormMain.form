@@ -115,6 +115,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="B&#xe1;n H&#xe0;ng"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnBHActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="btnHD">
               <Properties>

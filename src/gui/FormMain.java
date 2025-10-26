@@ -53,6 +53,11 @@ public class FormMain extends javax.swing.JFrame {
         });
 
         btnBH.setText("Bán Hàng");
+        btnBH.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBHActionPerformed(evt);
+            }
+        });
 
         btnHD.setText("Hóa đơn");
 
@@ -123,13 +128,22 @@ public class FormMain extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnQLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQLActionPerformed
-        // TODO add your handling code here:
+     
     FormChild.removeAll();
     FormQL formQL = new FormQL();
     FormChild.add(formQL, java.awt.BorderLayout.CENTER);
     FormChild.revalidate();
     FormChild.repaint();
     }//GEN-LAST:event_btnQLActionPerformed
+
+    private void btnBHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBHActionPerformed
+    FormChild.removeAll();
+    FormBH formBH = new FormBH();
+
+    FormChild.add(formBH, java.awt.BorderLayout.CENTER);
+    FormChild.revalidate();
+    FormChild.repaint();
+    }//GEN-LAST:event_btnBHActionPerformed
 
     /**
      * @param args the command line arguments
