@@ -107,6 +107,7 @@ public class FormHD extends javax.swing.JPanel {
 
         jLabel4.setText("Lọc theo:");
 
+        btnDelete.setBackground(new java.awt.Color(255, 153, 153));
         btnDelete.setText("Xóa hóa đơn");
         btnDelete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -239,27 +240,52 @@ public class FormHD extends javax.swing.JPanel {
     }//GEN-LAST:event_cboSearchActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
- Date tuNgay = jDateChooser1.getDate();
+    Date tuNgay = jDateChooser1.getDate();
     Date denNgay = jDateChooser2.getDate();
     
     if (tuNgay == null || denNgay == null) {
-        JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày!");
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc!");
         return;
     }
     
     if (tuNgay.after(denNgay)) {
-        JOptionPane.showMessageDialog(this, "Ngày bắt đầu phải trước ngày kết thúc!");
+        JOptionPane.showMessageDialog(this, "Ngày bắt đầu phải trước hoặc bằng ngày kết thúc!");
         return;
     }
-    
-    java.sql.Date sqlTuNgay = new java.sql.Date(tuNgay.getTime());
-    java.sql.Date sqlDenNgay = new java.sql.Date(denNgay.getTime());
-    
+    java.util.Calendar calFrom = java.util.Calendar.getInstance();
+    calFrom.setTime(tuNgay);
+    calFrom.set(java.util.Calendar.HOUR_OF_DAY, 0);
+    calFrom.set(java.util.Calendar.MINUTE, 0);
+    calFrom.set(java.util.Calendar.SECOND, 0);
+    calFrom.set(java.util.Calendar.MILLISECOND, 0);
+    java.util.Calendar calTo = java.util.Calendar.getInstance();
+    calTo.setTime(denNgay);
+    calTo.set(java.util.Calendar.HOUR_OF_DAY, 23);
+    calTo.set(java.util.Calendar.MINUTE, 59);
+    calTo.set(java.util.Calendar.SECOND, 59);
+    calTo.set(java.util.Calendar.MILLISECOND, 999);
+    java.sql.Date sqlTuNgay = new java.sql.Date(calFrom.getTimeInMillis());
+    java.sql.Date sqlDenNgay = new java.sql.Date(calTo.getTimeInMillis());
+    System.out.println("Tu ngay goc: " + tuNgay);
+    System.out.println("Den ngay goc: " + denNgay);
+    System.out.println("SQL Tu ngay: " + sqlTuNgay + " 00:00:00");
+    System.out.println("SQL Den ngay: " + sqlDenNgay + " 23:59:59");
     List<HoaDon> list = hoaDonDAO.locHoaDonTheoNgay(sqlTuNgay, sqlDenNgay);
+    System.out.println("So luong hoa don tim thay: " + list.size());
     hienThiDanhSach(list);
-    
     if (list.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn nào!");
+        JOptionPane.showMessageDialog(this, 
+            "Không tìm thấy hóa đơn nào trong khoảng thời gian này!", 
+            "Thông báo", 
+            JOptionPane.INFORMATION_MESSAGE);
+    } else {
+        JOptionPane.showMessageDialog(this, 
+            "Tìm thấy " + list.size() + " hóa đơn từ " + 
+            new java.text.SimpleDateFormat("dd/MM/yyyy").format(tuNgay) + 
+            " đến " + 
+            new java.text.SimpleDateFormat("dd/MM/yyyy").format(denNgay), 
+            "Kết quả tìm kiếm", 
+            JOptionPane.INFORMATION_MESSAGE);
     }
     }//GEN-LAST:event_btnSearchActionPerformed
 
@@ -303,8 +329,6 @@ public class FormHD extends javax.swing.JPanel {
     }
     
     int maHD = (int) tableModel.getValueAt(row, 0);
-    
-    // Mở FormChiTietBill
     FormChiTietBill dialog = new FormChiTietBill(
         (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this), 
         true, 

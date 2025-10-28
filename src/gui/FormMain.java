@@ -4,6 +4,16 @@
  */
 package gui;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 /**
  *
  * @author khaid
@@ -18,6 +28,13 @@ public class FormMain extends javax.swing.JFrame {
     public FormMain() {
         initComponents();
         FormChild.setLayout(new java.awt.BorderLayout());
+            if (FormLogin.taiKhoanDangNhap != null) {
+        setTitle("Quản lý bán hàng - " + FormLogin.taiKhoanDangNhap.getHoTen() 
+                + " (" + FormLogin.taiKhoanDangNhap.getVaiTro() + ")");
+    }
+    
+    // Căn giữa form
+    setLocationRelativeTo(null);
     }
 
     /**
@@ -29,12 +46,14 @@ public class FormMain extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         Background = new javax.swing.JPanel();
         BackgroundBtn = new javax.swing.JPanel();
         btnQL = new javax.swing.JButton();
         btnBH = new javax.swing.JButton();
         btnHD = new javax.swing.JButton();
         btnReport = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
         FormChild = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -67,24 +86,40 @@ public class FormMain extends javax.swing.JFrame {
         });
 
         btnReport.setText("Báo Cáo");
+        btnReport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReportActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel1.setFont(new java.awt.Font("Sitka Text", 1, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("QUẢN LÍ CỬA HÀNG MINI");
 
         javax.swing.GroupLayout BackgroundBtnLayout = new javax.swing.GroupLayout(BackgroundBtn);
         BackgroundBtn.setLayout(BackgroundBtnLayout);
         BackgroundBtnLayout.setHorizontalGroup(
             BackgroundBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, BackgroundBtnLayout.createSequentialGroup()
-                .addContainerGap(58, Short.MAX_VALUE)
+                .addContainerGap(66, Short.MAX_VALUE)
                 .addGroup(BackgroundBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(btnBH, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnQL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnHD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(57, 57, 57))
+                .addGap(67, 67, 67))
+            .addGroup(BackgroundBtnLayout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(jLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         BackgroundBtnLayout.setVerticalGroup(
             BackgroundBtnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(BackgroundBtnLayout.createSequentialGroup()
-                .addGap(119, 119, 119)
+                .addContainerGap()
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(29, 29, 29)
                 .addComponent(btnQL)
                 .addGap(39, 39, 39)
                 .addComponent(btnBH)
@@ -92,14 +127,14 @@ public class FormMain extends javax.swing.JFrame {
                 .addComponent(btnHD)
                 .addGap(38, 38, 38)
                 .addComponent(btnReport)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(129, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout FormChildLayout = new javax.swing.GroupLayout(FormChild);
         FormChild.setLayout(FormChildLayout);
         FormChildLayout.setHorizontalGroup(
             FormChildLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 633, Short.MAX_VALUE)
+            .addGap(0, 593, Short.MAX_VALUE)
         );
         FormChildLayout.setVerticalGroup(
             FormChildLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -113,8 +148,8 @@ public class FormMain extends javax.swing.JFrame {
             .addGroup(BackgroundLayout.createSequentialGroup()
                 .addComponent(BackgroundBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(FormChild, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(FormChild, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(66, Short.MAX_VALUE))
         );
         BackgroundLayout.setVerticalGroup(
             BackgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -159,6 +194,10 @@ public class FormMain extends javax.swing.JFrame {
     FormChild.repaint();
     }//GEN-LAST:event_btnHDActionPerformed
 
+    private void btnReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportActionPerformed
+
+    }//GEN-LAST:event_btnReportActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -192,5 +231,7 @@ public class FormMain extends javax.swing.JFrame {
     private javax.swing.JButton btnHD;
     private javax.swing.JButton btnQL;
     private javax.swing.JButton btnReport;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }

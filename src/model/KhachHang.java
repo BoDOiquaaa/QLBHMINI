@@ -31,7 +31,6 @@ public class KhachHang {
         this.diaChi = diaChi;
     }
 
-    // Getter và Setter
     public int getMaKH() {
         return maKH;
     }

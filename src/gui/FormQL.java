@@ -28,18 +28,12 @@ private DefaultTableModel tableModelKH;
             initComponents();
     this.setPreferredSize(null);
     sanPhamDAO = new SanPhamDAO();
-    
-    // Cấu hình ComboBox
     cboSearch.removeAllItems();
     cboSearch.addItem("Tất cả");
     cboSearch.addItem("Tên sản phẩm");
     cboSearch.addItem("Đơn giá");
-    
-    // Cấu hình Table
     khoiTaoTable();
     loadData();
-    
-    // Disable txtMaSP
     txtMaSP.setEnabled(false);
     khachHangDAO = new KhachHangDAO();
     
@@ -628,8 +622,6 @@ String keyword = txtSearchKH.getText().trim();
     } else if (loaiTimKiem.equalsIgnoreCase("Địa chỉ")) {
         list = khachHangDAO.timKiemKhachHangTheoDiaChi(keyword);
     }
-
-    // Hiển thị kết quả
     for (KhachHang kh : list) {
         Object[] row = {
             kh.getMaKH(),
@@ -657,7 +649,7 @@ private void khoiTaoTable() {
     tableModel = new DefaultTableModel(columnNames, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
-            return false; // Không cho edit trực tiếp trên table
+            return false; 
         }
     };
     tblSanPham.setModel(tableModel);
@@ -667,8 +659,6 @@ private void khoiTaoTable() {
     tblSanPham.getColumnModel().getColumn(1).setPreferredWidth(200);
     tblSanPham.getColumnModel().getColumn(2).setPreferredWidth(100);
     tblSanPham.getColumnModel().getColumn(3).setPreferredWidth(80);
-    
-    // Thêm sự kiện click vào row
     tblSanPham.addMouseListener(new java.awt.event.MouseAdapter() {
         public void mouseClicked(java.awt.event.MouseEvent evt) {
             hienThiThongTinSanPham();
@@ -677,7 +667,7 @@ private void khoiTaoTable() {
 }
 
 private void loadData() {
-    tableModel.setRowCount(0); // Xóa dữ liệu cũ
+    tableModel.setRowCount(0); 
     List<SanPham> list = sanPhamDAO.getAllSanPham();
     
     for (SanPham sp : list) {

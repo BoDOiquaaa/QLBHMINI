@@ -19,8 +19,7 @@ public class HoaDonDAO {
     public HoaDonDAO() {
         dbConnection = new DatabaseConnection();
     }
-    
-    // Tạo hóa đơn mới (trả về mã hóa đơn)
+
     public int taoHoaDon(int maKH) {
         String sql = "INSERT INTO HoaDon(MaKH) VALUES (?)";
         
@@ -29,8 +28,7 @@ public class HoaDonDAO {
             
             pstmt.setInt(1, maKH);
             pstmt.executeUpdate();
-            
-            // Lấy mã hóa đơn vừa tạo
+
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -40,8 +38,7 @@ public class HoaDonDAO {
         }
         return -1;
     }
-    
-    // Thêm chi tiết hóa đơn
+
     public boolean themChiTietHD(int maHD, int maSP, int soLuong) {
         String sql = "{CALL sp_ThemChiTietHD(?, ?, ?)}";
         
@@ -58,8 +55,7 @@ public class HoaDonDAO {
             return false;
         }
     }
-    
-    // Lấy tất cả hóa đơn
+
     public List<HoaDon> getAllHoaDon() {
     List<HoaDon> list = new ArrayList<>();
     String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
@@ -85,8 +81,7 @@ public class HoaDonDAO {
         }
         return list;
     }
-    
-    // Lấy chi tiết hóa đơn
+
     public List<ChiTietHD> getChiTietHoaDon(int maHD) {
         List<ChiTietHD> list = new ArrayList<>();
         String sql = "SELECT ct.*, sp.TenSP FROM ChiTietHD ct " +
@@ -115,8 +110,7 @@ public class HoaDonDAO {
         }
         return list;
     }
-    
-    // Lấy hóa đơn theo mã
+
 public HoaDon getHoaDonByMa(int maHD) {
     String sql = "SELECT hd.*, kh.TenKH, kh.SDT, kh.DiaChi FROM HoaDon hd " +
                  "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH WHERE hd.MaHD = ?";
@@ -145,8 +139,7 @@ public HoaDon getHoaDonByMa(int maHD) {
     }
     return null;
 }
-    
-    // Báo cáo doanh thu theo ngày
+
     public List<Object[]> baoCaoDoanhThuTheoNgay(Date tuNgay, Date denNgay) {
         List<Object[]> list = new ArrayList<>();
         String sql = "{CALL sp_DoanhThuTheoNgay(?, ?)}";
@@ -194,18 +187,21 @@ public HoaDon getHoaDonByMa(int maHD) {
         }
         return list;
     }
-    public List<HoaDon> locHoaDonTheoNgay(Date tuNgay, Date denNgay) {
-    List<HoaDon> list = new ArrayList<>();
+public List<HoaDon> locHoaDonTheoNgay(Date tuNgay, Date denNgay) {
+     List<HoaDon> list = new ArrayList<>();
     String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
                  "LEFT JOIN KhachHang kh ON hd.MaKH = kh.MaKH " +
-                 "WHERE CAST(hd.NgayLap AS DATE) BETWEEN ? AND ? " +
-                 "ORDER BY hd.NgayLap DESC";
+                 "WHERE CONVERT(DATE, hd.NgayLap) BETWEEN ? AND ? " +
+                 "ORDER BY hd.NgayLap DESC, hd.GioLap DESC";
     
     try (Connection conn = dbConnection.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(sql)) {
         
         pstmt.setDate(1, tuNgay);
         pstmt.setDate(2, denNgay);
+        
+        System.out.println("Executing SQL with dates: " + tuNgay + " to " + denNgay);
+        
         ResultSet rs = pstmt.executeQuery();
         
         while (rs.next()) {
@@ -217,14 +213,19 @@ public HoaDon getHoaDonByMa(int maHD) {
             hd.setTongTien(rs.getDouble("TongTien"));
             hd.setTenKH(rs.getString("TenKH"));
             list.add(hd);
+            
+            System.out.println("Found: HD #" + hd.getMaHD() + " - " + hd.getNgayLap());
         }
+        
+        System.out.println("Total found: " + list.size());
+        
     } catch (SQLException e) {
+        System.err.println("Error in locHoaDonTheoNgay: " + e.getMessage());
         e.printStackTrace();
     }
     return list;
 }
 
-    // Tìm hóa đơn theo mã
     public List<HoaDon> timHoaDonTheoMa(int maHD) {
     List<HoaDon> list = new ArrayList<>();
     String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
@@ -253,7 +254,6 @@ public HoaDon getHoaDonByMa(int maHD) {
     return list;
 }
 
-    // Lọc hóa đơn theo khách hàng
     public List<HoaDon> locHoaDonTheoKhachHang(int maKH) {
     List<HoaDon> list = new ArrayList<>();
     String sql = "SELECT hd.*, kh.TenKH FROM HoaDon hd " +
@@ -282,7 +282,6 @@ public HoaDon getHoaDonByMa(int maHD) {
     return list;
 }
 
-    // Xóa hóa đơn (xóa cả chi tiết)
     public boolean xoaHoaDon(int maHD) {
     String sqlChiTiet = "DELETE FROM ChiTietHD WHERE MaHD = ?";
     String sqlHoaDon = "DELETE FROM HoaDon WHERE MaHD = ?";
@@ -292,20 +291,17 @@ public HoaDon getHoaDonByMa(int maHD) {
         
         try (PreparedStatement pstmtChiTiet = conn.prepareStatement(sqlChiTiet);
              PreparedStatement pstmtHoaDon = conn.prepareStatement(sqlHoaDon)) {
-            
-            // Xóa chi tiết trước
+
             pstmtChiTiet.setInt(1, maHD);
             pstmtChiTiet.executeUpdate();
-            
-            // Xóa hóa đơn
             pstmtHoaDon.setInt(1, maHD);
             int result = pstmtHoaDon.executeUpdate();
             
-            conn.commit(); // Commit transaction
+            conn.commit(); 
             return result > 0;
             
         } catch (SQLException e) {
-            conn.rollback(); // Rollback nếu lỗi
+            conn.rollback(); 
             e.printStackTrace();
             return false;
         }

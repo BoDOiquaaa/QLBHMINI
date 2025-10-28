@@ -32,8 +32,6 @@ public class FormChiTietBill extends javax.swing.JDialog {
     initComponents();
     
     hoaDonDAO = new HoaDonDAO();
-    
-    // Disable các textfield
     txtMaHD.setEditable(false);
     txtTenKH.setEditable(false);
     txtSDT.setEditable(false);
@@ -45,13 +43,8 @@ public class FormChiTietBill extends javax.swing.JDialog {
     txtSDT.setBorder(javax.swing.BorderFactory.createEmptyBorder());
     txtDiaChi.setBorder(javax.swing.BorderFactory.createEmptyBorder());
     txtDate.setBorder(javax.swing.BorderFactory.createEmptyBorder());
-    // Thiết lập table
     setupTable();
-    
-    // Load dữ liệu
     loadChiTietHoaDon();
-    
-    // Căn giữa dialog
     setLocationRelativeTo(parent);
     }
     
@@ -110,7 +103,6 @@ public class FormChiTietBill extends javax.swing.JDialog {
         jLabel2.setText("Tên khách hàng:");
 
         txtTenKH.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        txtTenKH.setText("Nguyễn Lê Cẩm Tú");
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel3.setText("SDT:");
@@ -196,7 +188,7 @@ public class FormChiTietBill extends javax.swing.JDialog {
                 .addContainerGap(14, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnClose)
+                .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(28, 28, 28))
         );
         jPanel2Layout.setVerticalGroup(
@@ -222,10 +214,10 @@ public class FormChiTietBill extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnClose)
-                .addContainerGap(10, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 370, 500));
@@ -301,19 +293,13 @@ private void setupTable() {
         }
     };
     tblChiTietBill.setModel(tableModel);
-    
-    // Thiết lập độ rộng cột
     tblChiTietBill.getColumnModel().getColumn(0).setPreferredWidth(150);
     tblChiTietBill.getColumnModel().getColumn(1).setPreferredWidth(60);
     tblChiTietBill.getColumnModel().getColumn(2).setPreferredWidth(80);
     tblChiTietBill.getColumnModel().getColumn(3).setPreferredWidth(90);
-    
-    // Căn giữa cột số lượng
     DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
     centerRenderer.setHorizontalAlignment(JLabel.CENTER);
     tblChiTietBill.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
-    
-    // Căn phải cột tiền
     DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
     rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
     tblChiTietBill.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
@@ -321,19 +307,15 @@ private void setupTable() {
 }
 
 private void loadChiTietHoaDon() {
-    // Lấy thông tin hóa đơn
     HoaDon hd = hoaDonDAO.getHoaDonByMa(maHD);
     if (hd == null) {
         javax.swing.JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn!");
         dispose();
         return;
     }
-    
-    // Hiển thị thông tin hóa đơn
+  
     txtMaHD.setText(String.valueOf(hd.getMaHD()));
     txtTenKH.setText(hd.getTenKH() != null ? hd.getTenKH() : "Khách lẻ");
-    
-    // Hiển thị SĐT và địa chỉ (cần lấy từ HoaDonDAO)
     txtSDT.setText(hd.getSdt() != null ? hd.getSdt() : "");
     txtDiaChi.setText(hd.getDiaChi() != null ? hd.getDiaChi() : "");
     
@@ -344,11 +326,7 @@ private void loadChiTietHoaDon() {
         );
         txtDate.setText(dateFormat.format(fullDate));
     }
-    
-    // Lấy chi tiết hóa đơn
     List<ChiTietHD> chiTietList = hoaDonDAO.getChiTietHoaDon(maHD);
-    
-    // Hiển thị chi tiết
     tableModel.setRowCount(0);
     double tongTien = 0;
     
@@ -362,8 +340,6 @@ private void loadChiTietHoaDon() {
         tableModel.addRow(row);
         tongTien += ct.getThanhTien();
     }
-    
-    // Thêm dòng tổng cộng
     Object[] totalRow = {
         "TỔNG CỘNG",
         "",

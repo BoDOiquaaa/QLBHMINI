@@ -20,31 +20,22 @@ import model.SanPham;
  * @author khaid
  */
 public class FormBH extends javax.swing.JPanel {
-// DAO để truy vấn database
+
     private KhachHangDAO khachHangDAO;
     private SanPhamDAO sanPhamDAO;
     private HoaDonDAO hoaDonDAO;
-    
-    // Danh sách dữ liệu
     private List<KhachHang> danhSachKH;
     private List<SanPham> danhSachSP;
-    
-    // Table model cho giỏ hàng
     private DefaultTableModel modelGioHang;
-    
-    // Khách hàng đã chọn
     private KhachHang khachHangDaChon = null;
     /**
      * Creates new form FormBH
      */
     public FormBH() {
         initComponents();
-        // Khởi tạo DAO
     khachHangDAO = new KhachHangDAO();
     sanPhamDAO = new SanPhamDAO();
     hoaDonDAO = new HoaDonDAO();
-    
-    // Thiết lập giao diện
     setupTable();
     setupTableRenderer(); 
     spnSoLuong.setValue(1);
@@ -52,7 +43,6 @@ public class FormBH extends javax.swing.JPanel {
     setupEvents();
     spnEdit = new javax.swing.JSpinner();
     spnEdit.setModel(new javax.swing.SpinnerNumberModel(1, 1, 1000, 1));
-    // Vô hiệu hóa một số fields
     txtSDT.setEditable(false);
     txtDiaChi.setEditable(false);
     txtDonGia.setEditable(false);
@@ -101,7 +91,9 @@ public class FormBH extends javax.swing.JPanel {
         jLabel12 = new javax.swing.JLabel();
         spnEdit = new javax.swing.JSpinner();
 
-        pnlKH.setBackground(new java.awt.Color(204, 255, 255));
+        setBackground(new java.awt.Color(255, 204, 153));
+
+        pnlKH.setBackground(new java.awt.Color(255, 204, 153));
 
         jLabel1.setBackground(new java.awt.Color(51, 153, 255));
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
@@ -216,6 +208,8 @@ public class FormBH extends javax.swing.JPanel {
             }
         });
 
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+
         jLabel11.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel11.setText("Giỏ hàng");
 
@@ -259,8 +253,8 @@ public class FormBH extends javax.swing.JPanel {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel11)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(spnEdit, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 79, Short.MAX_VALUE)
+                .addComponent(spnEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnDelete)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -286,7 +280,7 @@ public class FormBH extends javax.swing.JPanel {
                         .addComponent(txtTong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel12)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spSanPham, javax.swing.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE))
+                .addComponent(spSanPham, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -344,7 +338,6 @@ public class FormBH extends javax.swing.JPanel {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 5, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -360,16 +353,15 @@ public class FormBH extends javax.swing.JPanel {
     List<KhachHang> ketQua = new ArrayList<>();
     
     switch (loaiTimKiem) {
-        case 0: // Tìm theo Tên
-        case 1: // Tìm theo SĐT
+        case 0: 
+        case 1:
             ketQua = khachHangDAO.timKiemKhachHang(keyword);
             break;
-        case 2: // Tìm theo Địa chỉ
+        case 2: 
             ketQua = khachHangDAO.timKiemKhachHangTheoDiaChi(keyword);
             break;
     }
-    
-    // Cập nhật ComboBox
+  
     cboKH.removeAllItems();
     if (ketQua.isEmpty()) {
         JOptionPane.showMessageDialog(this, "Không tìm thấy khách hàng!");
@@ -401,31 +393,22 @@ if (khachHangDaChon == null) {
         JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng trước!");
         return;
     }
-    
-    // Lấy sản phẩm
     int indexSP = cboSP.getSelectedIndex();
     if (indexSP < 0 || indexSP >= danhSachSP.size()) {
         JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm!");
         return;
     }
-    
     SanPham sp = danhSachSP.get(indexSP);
-    
-    // Lấy số lượng
     int soLuong = (Integer) spnSoLuong.getValue();
     if (soLuong <= 0) {
         JOptionPane.showMessageDialog(this, "Số lượng phải lớn hơn 0!");
         return;
     }
-    
-    // Kiểm tra tồn kho
     if (soLuong > sp.getTonKho()) {
         JOptionPane.showMessageDialog(this, 
             "Không đủ hàng! Còn: " + sp.getTonKho());
         return;
     }
-    
-    // Kiểm tra sản phẩm đã có chưa
     boolean daTonTai = false;
     for (int i = 0; i < modelGioHang.getRowCount(); i++) {
         int maSP = (int) modelGioHang.getValueAt(i, 0);
@@ -437,19 +420,15 @@ if (khachHangDaChon == null) {
                 JOptionPane.showMessageDialog(this, 
                     "Không đủ hàng! Tổng sẽ là " + slMoi + ", còn: " + sp.getTonKho());
                 return;
-            }
-            
+            }     
             modelGioHang.setValueAt(slMoi, i, 3);
             capNhatThanhTien(i);
             daTonTai = true;
-            
-            // Chọn dòng vừa cập nhật
+
             tblSanPham.setRowSelectionInterval(i, i);
             break;
         }
     }
-    
-    // Thêm mới nếu chưa có
     if (!daTonTai) {
         double thanhTien = sp.getDonGia() * soLuong;
         Object[] row = {
@@ -460,17 +439,11 @@ if (khachHangDaChon == null) {
             thanhTien
         };
         modelGioHang.addRow(row);
-        
-        // Chọn dòng mới thêm
         int newRow = modelGioHang.getRowCount() - 1;
         tblSanPham.setRowSelectionInterval(newRow, newRow);
     }
-    
     tinhTongTien();
-    
-    // Reset spinner về 1
     spnSoLuong.setValue(1);
-
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
@@ -495,27 +468,23 @@ if (khachHangDaChon == null) {
         JOptionPane.showMessageDialog(this, "Chưa chọn khách hàng!");
         return;
     }
-    
     if (modelGioHang.getRowCount() == 0) {
         JOptionPane.showMessageDialog(this, "Giỏ hàng trống!");
         return;
     }
-    
-    // Xác nhận
+
     int choice = JOptionPane.showConfirmDialog(this,
         "Xác nhận xuất hóa đơn?",
         "Xác nhận",
         JOptionPane.YES_NO_OPTION);
     
     if (choice != JOptionPane.YES_OPTION) return;
-    
-    // Tạo hóa đơn
+
     int maHD = hoaDonDAO.taoHoaDon(khachHangDaChon.getMaKH());
     
     if (maHD > 0) {
         boolean success = true;
-        
-        // Thêm chi tiết
+
         for (int i = 0; i < modelGioHang.getRowCount(); i++) {
             int maSP = (int) modelGioHang.getValueAt(i, 0);
             int soLuong = (int) modelGioHang.getValueAt(i, 3);
@@ -541,23 +510,21 @@ if (khachHangDaChon == null) {
     }//GEN-LAST:event_btnInBillActionPerformed
 
 private void setupTable() {
-        // Tạo model cho table
     String[] columns = {"Mã SP", "Tên SP", "Đơn giá", "Số lượng", "Thành tiền"};
     modelGioHang = new DefaultTableModel(columns, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
-            // Không cho phép edit trực tiếp, dùng spnEdit
             return false;
         }
         
         @Override
         public Class<?> getColumnClass(int columnIndex) {
             switch (columnIndex) {
-                case 0: // Mã SP
-                case 3: // Số lượng
+                case 0: 
+                case 3:
                     return Integer.class;
-                case 2: // Đơn giá
-                case 4: // Thành tiền
+                case 2: 
+                case 4: 
                     return Double.class;
                 default:
                     return String.class;
@@ -566,31 +533,28 @@ private void setupTable() {
     };
     
     tblSanPham.setModel(modelGioHang);
-    
-    // Thiết lập độ rộng cột
+
     tblSanPham.getColumnModel().getColumn(0).setPreferredWidth(50);  // Mã SP
     tblSanPham.getColumnModel().getColumn(1).setPreferredWidth(200); // Tên SP
     tblSanPham.getColumnModel().getColumn(2).setPreferredWidth(100); // Đơn giá
     tblSanPham.getColumnModel().getColumn(3).setPreferredWidth(80);  // Số lượng
     tblSanPham.getColumnModel().getColumn(4).setPreferredWidth(120); // Thành tiền
-    
-    // Set chiều cao row
+
     tblSanPham.setRowHeight(25);
-    
-    // Căn giữa cột Số lượng
+
     DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
     centerRenderer.setHorizontalAlignment(JLabel.CENTER);
     tblSanPham.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
 }
 private void loadDataComboBox() {
-    // Load Khách hàng
+  
     danhSachKH = khachHangDAO.getAllKhachHang();
     cboKH.removeAllItems();
     for (KhachHang kh : danhSachKH) {
         cboKH.addItem(kh.getTenKH()); 
     }
     
-    // Load Sản phẩm
+  
     danhSachSP = sanPhamDAO.getAllSanPham();
     cboSP.removeAllItems();
     for (SanPham sp : danhSachSP) {
@@ -598,29 +562,24 @@ private void loadDataComboBox() {
     }
 }
 private void setupEvents() {
-    // Khi chọn sản phẩm trong ComboBox
+
     cboSP.addActionListener(e -> {
         int index = cboSP.getSelectedIndex();
         if (index >= 0 && index < danhSachSP.size()) {
             SanPham sp = danhSachSP.get(index);
             txtDonGia.setText(String.format("%,.0f", sp.getDonGia()));
             txtTonKho.setText(String.valueOf(sp.getTonKho()));
-            
-            // Cập nhật giới hạn spinner
             javax.swing.SpinnerNumberModel model = new javax.swing.SpinnerNumberModel(
-                1,              // Giá trị ban đầu
-                1,              // Giá trị min
-                sp.getTonKho(), // Giá trị max
-                1               // Bước nhảy
+                1,              
+                1,             
+                sp.getTonKho(), 
+                1              
             );
             spnSoLuong.setModel(model);
         }
     });
-    
-    // Disable spnEdit ban đầu
     spnEdit.setEnabled(false);
-    
-    // Khi chọn dòng trong table
+
     tblSanPham.getSelectionModel().addListSelectionListener(e -> {
         if (!e.getValueIsAdjusting()) {
             int row = tblSanPham.getSelectedRow();
@@ -628,19 +587,17 @@ private void setupEvents() {
                 int soLuong = (int) modelGioHang.getValueAt(row, 3);
                 int maSP = (int) modelGioHang.getValueAt(row, 0);
                 
-                // Tìm sản phẩm để lấy tồn kho
                 SanPham sp = danhSachSP.stream()
                     .filter(x -> x.getMaSP() == maSP)
                     .findFirst()
                     .orElse(null);
                 
                 if (sp != null) {
-                    // Cập nhật spinner với giới hạn tồn kho
                     javax.swing.SpinnerNumberModel model = new javax.swing.SpinnerNumberModel(
-                        soLuong,        // Giá trị hiện tại
-                        1,              // Min
-                        sp.getTonKho(), // Max
-                        1               // Step
+                        soLuong,       
+                        1,             
+                        sp.getTonKho(), 
+                        1             
                     );
                     spnEdit.setModel(model);
                     spnEdit.setEnabled(true);
@@ -653,7 +610,7 @@ private void setupEvents() {
         }
     });
     
-    // Khi thay đổi giá trị spnEdit
+ 
     spnEdit.addChangeListener(e -> {
         if (!spnEdit.isEnabled()) return;
         
@@ -661,8 +618,7 @@ private void setupEvents() {
         if (row >= 0) {
             int soLuongMoi = (int) spnEdit.getValue();
             int soLuongCu = (int) modelGioHang.getValueAt(row, 3);
-            
-            // Chỉ cập nhật nếu giá trị thực sự thay đổi
+  
             if (soLuongMoi != soLuongCu) {
                 modelGioHang.setValueAt(soLuongMoi, row, 3);
                 capNhatThanhTien(row);
@@ -720,8 +676,7 @@ private void setupTableRenderer() {
             setHorizontalAlignment(JLabel.RIGHT);
         }
     };
-    
-    // Áp dụng cho cột Đơn giá và Thành tiền
+
     tblSanPham.getColumnModel().getColumn(2).setCellRenderer(moneyRenderer);
     tblSanPham.getColumnModel().getColumn(4).setCellRenderer(moneyRenderer);
 }

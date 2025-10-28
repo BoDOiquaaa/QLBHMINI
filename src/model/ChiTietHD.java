@@ -15,15 +15,12 @@ public class ChiTietHD {
     private int soLuong;
     private double donGia;
     private double thanhTien;
-    
-    // Thông tin sản phẩm (để hiển thị)
+
     private String tenSP;
 
-    // Constructor không tham số
     public ChiTietHD() {
     }
 
-    // Constructor đầy đủ
     public ChiTietHD(int maCT, int maHD, int maSP, int soLuong, double donGia, double thanhTien) {
         this.maCT = maCT;
         this.maHD = maHD;
@@ -33,14 +30,12 @@ public class ChiTietHD {
         this.thanhTien = thanhTien;
     }
 
-    // Constructor khi thêm chi tiết (không có mã)
     public ChiTietHD(int maHD, int maSP, int soLuong) {
         this.maHD = maHD;
         this.maSP = maSP;
         this.soLuong = soLuong;
     }
 
-    // Getter và Setter
     public int getMaCT() {
         return maCT;
     }

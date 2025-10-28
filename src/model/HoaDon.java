@@ -9,17 +9,14 @@ public class HoaDon {
     private Date ngayLap;
     private Time gioLap;
     private double tongTien;
-    
-    // Thông tin khách hàng (để hiển thị)
-    private String tenKH;
-    private String sdt;      // ← ĐÃ THÊM
-    private String diaChi;   // ← ĐÃ THÊM
 
-    // Constructor không tham số
+    private String tenKH;
+    private String sdt;     
+    private String diaChi;   
+
     public HoaDon() {
     }
 
-    // Constructor đầy đủ
     public HoaDon(int maHD, int maKH, Date ngayLap, Time gioLap, double tongTien) {
         this.maHD = maHD;
         this.maKH = maKH;
@@ -28,7 +25,6 @@ public class HoaDon {
         this.tongTien = tongTien;
     }
 
-    // Constructor khi tạo mới hóa đơn
     public HoaDon(int maKH) {
         this.maKH = maKH;
         this.tongTien = 0;
